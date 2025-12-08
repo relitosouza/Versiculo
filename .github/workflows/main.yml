@@ -1,0 +1,33 @@
+name: Enviar Versículo Diário
+
+on:
+  schedule:
+    # A hora é em UTC. Para enviar às 07:00 do Brasil (UTC-3), colocamos 10:00 UTC.
+    # Sintaxe Cron: minuto hora dia mês dia_da_semana
+    - cron: '0 10 * * *'
+  
+  # Permite rodar manualmente para testar (botão "Run workflow")
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar código do repositório
+        uses: actions/checkout@v3
+
+      - name: Configurar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Instalar dependências
+        run: |
+          pip install -r requirements.txt
+
+      - name: Rodar script de envio
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python main.py
