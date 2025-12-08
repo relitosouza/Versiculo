@@ -47,7 +47,7 @@ def enviar_mensagem():
     
     if hoje in calendario:
         versiculo = calendario[hoje]
-        mensagem = f"📖 *Leitura do Dia ({hoje})*\n\n{versiculo}\n\n_Bons estudos!_"
+        mensagem = f"📖 *Leitura do Dia ({hoje})*\n\n{versiculo}\n\n_Boa Leitura!_"
         
         url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
         dados = {"chat_id": CHAT_ID, "text": mensagem, "parse_mode": "Markdown"}
