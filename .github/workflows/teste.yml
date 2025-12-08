@@ -18,7 +18,7 @@ jobs:
 
       - name: Instalar bibliotecas
         run: |
-          pip install requests
+          pip install -r requirements.txt
 
       - name: Rodar o Robô
         env: # Aqui o GitHub injeta as chaves que você criou no Passo 1
