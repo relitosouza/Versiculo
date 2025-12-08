@@ -2,6 +2,15 @@ import requests
 import os
 from datetime import datetime
 import sys
+# Adicione no topo
+from pytz import timezone
+
+# Dentro da função enviar_mensagem(), troque:
+# hoje = datetime.now().strftime("%d/%m")
+
+# Por:
+fuso_brasil = timezone('America/Sao_Paulo')
+hoje = datetime.now(fuso_brasil).strftime("%d/%m")
 
 # --- CONFIGURAÇÕES VIA VARIÁVEIS DE AMBIENTE (SEGURANÇA) ---
 # O GitHub vai injetar esses valores secretamente
