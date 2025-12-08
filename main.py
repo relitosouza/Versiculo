@@ -2,18 +2,9 @@ import requests
 import os
 from datetime import datetime
 import sys
-# Adicione no topo
 from pytz import timezone
 
-# Dentro da função enviar_mensagem(), troque:
-# hoje = datetime.now().strftime("%d/%m")
-
-# Por:
-fuso_brasil = timezone('America/Sao_Paulo')
-hoje = datetime.now(fuso_brasil).strftime("%d/%m")
-
-# --- CONFIGURAÇÕES VIA VARIÁVEIS DE AMBIENTE (SEGURANÇA) ---
-# O GitHub vai injetar esses valores secretamente
+# --- CONFIGURAÇÕES VIA VARIÁVEIS DE AMBIENTE ---
 TOKEN = os.environ.get("TELEGRAM_TOKEN")
 CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
 
@@ -50,8 +41,9 @@ calendario = {
 }
 
 def enviar_mensagem():
-    # Pega data atual no formato dia/mês (ex: 07/12)
-    hoje = datetime.now().strftime("%d/%m")
+    # --- CORREÇÃO AQUI: Fuso Horário dentro da função ---
+    fuso_brasil = timezone('America/Sao_Paulo')
+    hoje = datetime.now(fuso_brasil).strftime("%d/%m")
     
     if hoje in calendario:
         versiculo = calendario[hoje]
@@ -66,7 +58,7 @@ def enviar_mensagem():
             print(f"✅ Sucesso! Mensagem enviada para {hoje}.")
         else:
             print(f"❌ Erro ao enviar: {response.text}")
-            sys.exit(1) # Informa ao GitHub que houve erro
+            sys.exit(1)
     else:
         print(f"📅 Hoje ({hoje}) não está na lista de leitura. Nada a fazer.")
 
