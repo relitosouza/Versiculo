@@ -1,0 +1,27 @@
+name: Teste Manual Telegram
+
+on:
+  workflow_dispatch: # <--- ISSO CRIA O BOTÃO DE TESTE MANUAL
+
+jobs:
+  meu-teste:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v3
+
+      - name: Instalar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Instalar bibliotecas
+        run: |
+          pip install requests
+
+      - name: Rodar o Robô
+        env: # Aqui o GitHub injeta as chaves que você criou no Passo 1
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python main.py # <--- ATENÇÃO: O nome do arquivo deve ser igual ao seu
