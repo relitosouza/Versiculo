@@ -51,11 +51,9 @@ LIVROS_INGLES = {
 }
 
 def buscar_texto_biblico(referencia_pt):
-    """
-    Converte a referência para inglês e busca o texto na API formatado com versículos
-    """
     try:
-        # 1. Separar o livro do capítulo
+        print(f"--- DEBUG: Iniciando busca por '{referencia_pt}' ---")
+        
         partes = referencia_pt.split()
         if partes[0].isdigit(): 
             livro_pt = f"{partes[0]} {partes[1]}"
@@ -64,33 +62,33 @@ def buscar_texto_biblico(referencia_pt):
             livro_pt = partes[0]
             capitulo_versiculo = partes[1]
 
-        # 2. Traduzir livro
+        print(f"--- DEBUG: Livro PT identificado: '{livro_pt}' ---")
+        
         livro_en = LIVROS_INGLES.get(livro_pt)
+        print(f"--- DEBUG: Livro EN traduzido: '{livro_en}' ---")
+        
         if not livro_en:
-            return f"(Não foi possível buscar automaticamente. Leia em: {referencia_pt})"
+            print(f"❌ ERRO: O livro '{livro_pt}' não está no dicionário LIVROS_INGLES.")
+            return f"(Erro de tradução. Leia em: {referencia_pt})"
 
-        # 3. Chamar API
         url = f"https://bible-api.com/{livro_en}+{capitulo_versiculo}?translation=almeida"
+        print(f"--- DEBUG: URL gerada: {url} ---")
+        
         resposta = requests.get(url)
+        print(f"--- DEBUG: Status da API: {resposta.status_code} ---")
+        
         dados = resposta.json()
 
-        # 4. Formatar texto com números dos versículos
-        if 'verses' in dados:
-            texto_formatado = ""
-            for verso in dados['verses']:
-                numero = verso['verse']
-                texto = verso['text'].strip()
-                # Cria linha: "1. Texto do versiculo"
-                texto_formatado += f"*{numero}.* {texto}\n"
-            return texto_formatado
-            
-        elif 'text' in dados:
+        if 'text' in dados:
             return dados['text'].strip()
+        elif 'error' in dados:
+            print(f"❌ ERRO API: {dados['error']}")
+            return f"(Erro na API: {dados['error']})"
         else:
-            return f"(Erro na API ou texto não encontrado)"
+            return f"(Erro desconhecido na API)"
 
     except Exception as e:
-        print(f"Erro ao buscar versículo: {e}")
+        print(f"❌ ERRO CRÍTICO: {e}")
         return f"(Leia em sua Bíblia: {referencia_pt})"
 
 def enviar_mensagem():
