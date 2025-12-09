@@ -104,7 +104,7 @@ def enviar_mensagem():
             f"📖 *Leitura do Dia ({hoje})*\n"
             f"📍 *Ref:* `{ref}`\n\n"
             f"{texto_biblico}\n\n"
-            f"_Bons estudos!_"
+            f"_Boa Leitura!_"
         )
         
         url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
