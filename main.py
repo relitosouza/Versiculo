@@ -104,7 +104,7 @@ def enviar_mensagem():
             # Cria um link para o site Bíblia Online como backup
             link_backup = f"https://www.bibliaonline.com.br/acf/{ref.replace(' ', '/').replace(':', '/')}"
             conteudo = f"_(O texto completo não pôde ser carregado automaticamente.)_\n\n👉 [Clique aqui para ler {ref} online]({link_backup})"
-            aviso = "\n\n⚠️ _Abra sua Bíblia física ou use o link acima._"
+            aviso = "\n\n⚠️ _Use o link acima._"
 
         mensagem = (
             f"📖 *Leitura do Dia ({hoje})*\n"
