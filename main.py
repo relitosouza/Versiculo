@@ -52,7 +52,7 @@ LIVROS_INGLES = {
 
 def buscar_texto_biblico(referencia_pt):
     try:
-        # 1. Tentar traduzir e buscar
+        # 1. Separar livro e capítulo
         partes = referencia_pt.split()
         if partes[0].isdigit(): 
             livro_pt = f"{partes[0]} {partes[1]}"
@@ -64,18 +64,29 @@ def buscar_texto_biblico(referencia_pt):
         livro_en = LIVROS_INGLES.get(livro_pt)
         
         if not livro_en:
-            return None # Livro não encontrado no dicionário
+            return None 
 
-        # Tenta buscar na API
+        # 2. Busca na API
         url = f"https://bible-api.com/{livro_en}+{capitulo_versiculo}?translation=almeida"
         resposta = requests.get(url)
         dados = resposta.json()
 
-        if 'text' in dados:
+        # --- AQUI ESTÁ A MUDANÇA PARA NUMERAR OS VERSÍCULOS ---
+        if 'verses' in dados:
+            texto_montado = ""
+            for v in dados['verses']:
+                numero = v['verse']
+                texto = v['text'].strip()
+                # Cria linha: **1.** Texto do versículo
+                texto_montado += f"**{numero}.** {texto}\n"
+            
+            return texto_montado
+        
+        elif 'text' in dados: # Fallback caso a API mude o formato
             return dados['text'].strip()
+            
         else:
-            # Se a API responder "not found", retornamos None para tratar depois
-            print(f"⚠️ API retornou erro para {referencia_pt}: {dados}")
+            print(f"⚠️ API retornou dados sem texto para {referencia_pt}: {dados}")
             return None
 
     except Exception as e:
@@ -91,31 +102,26 @@ def enviar_mensagem():
     if hoje in calendario:
         ref = calendario[hoje]
         
-        # Busca o texto
         texto_biblico = buscar_texto_biblico(ref)
         
-        # LÓGICA INTELIGENTE:
-        # Se achou o texto, manda completo.
-        # Se NÃO achou (erro 404), manda um link para a pessoa ler online.
         if texto_biblico:
             conteudo = texto_biblico
             aviso = ""
         else:
-            # Cria um link para o site Bíblia Online como backup
+            # Link de backup se falhar
             link_backup = f"https://www.bibliaonline.com.br/acf/{ref.replace(' ', '/').replace(':', '/')}"
             conteudo = f"_(O texto completo não pôde ser carregado automaticamente.)_\n\n👉 [Clique aqui para ler {ref} online]({link_backup})"
-            aviso = "\n\n⚠️ _Use o link acima._"
+            aviso = "\n\n⚠️ _Abra sua Bíblia física ou use o link acima._"
 
         mensagem = (
             f"📖 *Leitura do Dia ({hoje})*\n"
             f"📍 *Ref:* `{ref}`\n\n"
             f"{conteudo}"
             f"{aviso}\n\n"
-            f"_Boa Leitura!_"
+            f"_Bons estudos!_"
         )
         
         url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
-        # disable_web_page_preview=False permite que o link gere uma "fotinha" do site se quiser
         dados = {"chat_id": CHAT_ID, "text": mensagem, "parse_mode": "Markdown", "disable_web_page_preview": False}
         
         response = requests.post(url, data=dados)
