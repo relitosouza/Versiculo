@@ -8,40 +8,58 @@ from pytz import timezone
 TOKEN = os.environ.get("TELEGRAM_TOKEN")
 CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
 
-# --- LISTA DE REFERÊNCIAS ---
+# --- LISTA DE REFERÊNCIAS (ATUALIZADA JANEIRO/FEVEREIRO 2026) ---
 calendario = {
-    "07/12": "Mateus 26:36-39",
-    "08/12": "Mateus 26:40-46",
-    "09/12": "Ageu 1:4-8",
-    "10/12": "João 15:5-8",
-    "11/12": "Jeremias 17:5-10",
-    "12/12": "1 Coríntios 3:9-13",
-    "13/12": "1 Coríntios 3:14-19",
-    "14/12": "Apocalipse 2:2-5",
-    "15/12": "Provérbios 4:23-27",
-    "16/12": "2 Timóteo 4:1-5",
-    "17/12": "Isaías 29:13-16",
-    "18/12": "Tiago 1:5-12",
-    "19/12": "Salmos 51:5-13",
-    "20/12": "Romanos 12:9-18",
-    "21/12": "Ezequiel 36:25-31",
-    "22/12": "Lucas 23:44-49",
-    "23/12": "Salmos 139:1-8",
-    "24/12": "Gálatas 5:16-23",
-    "25/12": "2 Crônicas 15:1-7",
-    "26/12": "1 João 1:5-9",
-    "27/12": "Tiago 4:7-10",
-    "28/12": "Filipenses 2:3-11",
-    "29/12": "Salmos 119:9-16",
-    "30/12": "Colossenses 3:1-7",
-    "31/12": "Isaías 1:16-20",
-    "01/01": "Efésios 4:10-14",
-    "02/01": "Efésios 4:15-24",
-    "03/01": "Efésios 4:25-32"
+    "01/01": "Deuteronômio 28:1-7",
+    "02/01": "Deuteronômio 28:8-14",
+    "03/01": "Deuteronômio 28:15-26",
+    "04/01": "Deuteronômio 28:27-44",
+    "05/01": "Deuteronômio 28:45-57",
+    "06/01": "Deuteronômio 28:58-68",
+    "07/01": "Gálatas 3:6-14",
+    "08/01": "Provérbios 26:2",
+    "09/01": "Lucas 6:20-31",
+    "10/01": "Lucas 6:32-38",
+    "11/01": "Lucas 6:39-49",
+    "12/01": "Hebreus 3:7-11",
+    "13/01": "Hebreus 3:12-19",
+    "14/01": "Hebreus 4:11-16",
+    "15/01": "Hebreus 11:1-16",
+    "16/01": "Efésios 1:16-23",
+    "17/01": "Efésios 2:1-10",
+    "18/01": "Gênesis 12:1-7",
+    "19/01": "Gênesis 24:1-9",
+    "20/01": "Gênesis 24:10-21",
+    "21/01": "Gênesis 24:22-49",
+    "22/01": "Gênesis 24:50-67",
+    "23/01": "Provérbios 31:1-31",
+    "24/01": "Gálatas 5:16-26",
+    "25/01": "João 6:24-27",
+    "26/01": "João 6:28-29",
+    "27/01": "João 6:30-40",
+    "28/01": "João 6:41-51",
+    "29/01": "João 6:52-58",
+    "30/01": "João 6:59-71",
+    "31/01": "Salmos 27",
+    "01/02": "Isaías 53:1-6",
+    "02/02": "Isaías 53:7-12",
+    "03/02": "Isaías 54:1-6",
+    "04/02": "Isaías 54:7-17",
+    "05/02": "Isaías 55:1-11",
+    "06/02": "Isaías 61:1-4",
+    "07/02": "Tiago 3:13-18",
+    "08/02": "Números 12:1-16"
 }
 
 # Tradução dos livros para Inglês (Necessário para a API funcionar)
 LIVROS_INGLES = {
+    # Novos adicionados
+    "Deuteronômio": "Deuteronomy",
+    "Hebreus": "Hebrews",
+    "Gênesis": "Genesis",
+    "Números": "Numbers",
+    
+    # Já existentes
     "Mateus": "Matthew", "Ageu": "Haggai", "João": "John", "Jeremias": "Jeremiah",
     "1 Coríntios": "1 Corinthians", "Apocalipse": "Revelation", "Provérbios": "Proverbs",
     "2 Timóteo": "2 Timothy", "Isaías": "Isaiah", "Tiago": "James", "Salmos": "Psalms",
@@ -53,17 +71,27 @@ LIVROS_INGLES = {
 def buscar_texto_biblico(referencia_pt):
     try:
         # 1. Separar livro e capítulo
+        # Lógica melhorada para pegar nomes de livros compostos ou simples
         partes = referencia_pt.split()
+        
+        # Se começar com número (ex: 1 João)
         if partes[0].isdigit(): 
             livro_pt = f"{partes[0]} {partes[1]}"
-            capitulo_versiculo = partes[2]
+            restante = partes[2]
         else:
             livro_pt = partes[0]
-            capitulo_versiculo = partes[1]
+            restante = partes[1]
+
+        # Verifica se tem versículo ou é capitulo inteiro
+        if ":" in restante:
+            capitulo_versiculo = restante
+        else:
+            capitulo_versiculo = restante # Caso seja "Salmos 27"
 
         livro_en = LIVROS_INGLES.get(livro_pt)
         
         if not livro_en:
+            print(f"Livro não encontrado no dicionário: {livro_pt}")
             return None 
 
         # 2. Busca na API
@@ -71,18 +99,16 @@ def buscar_texto_biblico(referencia_pt):
         resposta = requests.get(url)
         dados = resposta.json()
 
-        # --- AQUI ESTÁ A MUDANÇA PARA NUMERAR OS VERSÍCULOS ---
+        # 3. Processar retorno
         if 'verses' in dados:
             texto_montado = ""
             for v in dados['verses']:
                 numero = v['verse']
                 texto = v['text'].strip()
-                # Cria linha: **1.** Texto do versículo
                 texto_montado += f"**{numero}.** {texto}\n"
-            
             return texto_montado
         
-        elif 'text' in dados: # Fallback caso a API mude o formato
+        elif 'text' in dados: 
             return dados['text'].strip()
             
         else:
@@ -109,16 +135,18 @@ def enviar_mensagem():
             aviso = ""
         else:
             # Link de backup se falhar
-            link_backup = f"https://www.bibliaonline.com.br/acf/{ref.replace(' ', '/').replace(':', '/')}"
+            # Ajuste técnico para link: substitui espaços e dois pontos por barras
+            link_ref = ref.replace(' ', '/').replace(':', '/')
+            link_backup = f"https://www.bibliaonline.com.br/acf/{link_ref}"
             conteudo = f"_(O texto completo não pôde ser carregado automaticamente.)_\n\n👉 [Clique aqui para ler {ref} online]({link_backup})"
-            aviso = "\n\n⚠️ _Para ler o capítulo use o link acima._"
+            aviso = "\n\n⚠️ _Abra sua Bíblia física ou use o link acima._"
 
         mensagem = (
             f"📖 *Leitura do Dia ({hoje})*\n"
             f"📍 *Ref:* `{ref}`\n\n"
             f"{conteudo}"
             f"{aviso}\n\n"
-            f"_Boa Leitura!_"
+            f"_Bons estudos!_"
         )
         
         url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
